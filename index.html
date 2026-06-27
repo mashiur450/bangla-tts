@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>বাংলা টেক্সট টু স্পিচ</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0f0c29;
+      background-image: url('background.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 0;
+    }
+
+    .card {
+      position: relative;
+      z-index: 1;
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 620px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+      color: #fff;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .logo h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 1px;
+    }
+
+    .logo p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 4px;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      color: rgba(255,255,255,0.75);
+      margin-bottom: 8px;
+    }
+
+    .voice-select {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 15px;
+      margin-bottom: 20px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .voice-select option {
+      background: #1a1a2e;
+      color: #fff;
+    }
+
+    textarea {
+      width: 100%;
+      height: 160px;
+      padding: 14px 16px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 15px;
+      line-height: 1.7;
+      resize: vertical;
+      outline: none;
+      transition: border 0.3s;
+      font-family: inherit;
+    }
+
+    textarea::placeholder { color: rgba(255,255,255,0.35); }
+    textarea:focus { border-color: rgba(255,255,255,0.5); }
+
+    .char-count {
+      text-align: right;
+      font-size: 12px;
+      color: rgba(255,255,255,0.45);
+      margin-top: 6px;
+      margin-bottom: 20px;
+    }
+
+    .btn-generate {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-generate:hover { opacity: 0.9; }
+    .btn-generate:active { transform: scale(0.98); }
+    .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .audio-box {
+      display: none;
+      margin-top: 24px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .audio-box p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+      margin-bottom: 12px;
+    }
+
+    audio {
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 14px;
+    }
+
+    .btn-download {
+      display: block;
+      width: 100%;
+      padding: 11px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.25);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-download:hover { background: rgba(255,255,255,0.2); }
+
+    .error-box {
+      display: none;
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: rgba(255,80,80,0.15);
+      border: 1px solid rgba(255,80,80,0.3);
+      border-radius: 10px;
+      color: #ffaaaa;
+      font-size: 13px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 28px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="overlay"></div>
+
+  <div class="card">
+    <div class="logo">
+      <h1>🎙️ বাংলা TTS</h1>
+      <p>টেক্সট লিখুন, অডিও শুনুন</p>
+    </div>
+
+    <label>ভয়েস সিলেক্ট করুন</label>
+    <select class="voice-select" id="voiceSelect">
+      <option value="25af00d9a9c043a2a628c741d9eb62f9">🎤 MASHIUR (বাংলা পুরুষ)</option>
+    </select>
+
+    <label>বাংলা টেক্সট লিখুন</label>
+    <textarea id="textInput" placeholder="এখানে বাংলায় লিখুন..."></textarea>
+    <div class="char-count"><span id="charCount">0</span> অক্ষর</div>
+
+    <button class="btn-generate" id="generateBtn" onclick="generateAudio()">
+      🔊 অডিও তৈরি করুন
+    </button>
+
+    <div class="loading" id="loading">
+      <span class="spinner"></span> অডিও তৈরি হচ্ছে...
+    </div>
+
+    <div class="error-box" id="errorBox"></div>
+
+    <div class="audio-box" id="audioBox">
+      <p>✅ অডিও তৈরি হয়েছে</p>
+      <audio id="audioPlayer" controls></audio>
+      <a class="btn-download" id="downloadBtn" download="audio.mp3">⬇️ ডাউনলোড করুন</a>
+    </div>
+
+    <div class="footer">Powered by Fish Audio × Vercel</div>
+  </div>
+
+  <script>
+    const BACKEND_URL = 'https://tts-backend-tau.vercel.app/api/tts';
+
+    document.getElementById('textInput').addEventListener('input', function() {
+      document.getElementById('charCount').textContent = this.value.length;
+    });
+
+    async function generateAudio() {
+      const text = document.getElementById('textInput').value.trim();
+      const voiceId = document.getElementById('voiceSelect').value;
+
+      if (!text) {
+        showError('অনুগ্রহ করে কিছু লিখুন।');
+        return;
+      }
+
+      const btn = document.getElementById('generateBtn');
+      const loading = document.getElementById('loading');
+      const audioBox = document.getElementById('audioBox');
+      const errorBox = document.getElementById('errorBox');
+
+      btn.disabled = true;
+      loading.style.display = 'block';
+      audioBox.style.display = 'none';
+      errorBox.style.display = 'none';
+
+      try {
+        const response = await fetch(BACKEND_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text, voice_id: voiceId })
+        });
+
+        if (!response.ok) throw new Error('সার্ভার এরর: ' + response.status);
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+
+        document.getElementById('audioPlayer').src = url;
+        document.getElementById('downloadBtn').href = url;
+        audioBox.style.display = 'block';
+
+      } catch (err) {
+        showError('এরর হয়েছে: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        loading.style.display = 'none';
+      }
+    }
+
+    function showError(msg) {
+      const box = document.getElementById('errorBox');
+      box.textContent = msg;
+      box.style.display = 'block';
+    }
+  </script>
+
+</body>
+</html>
